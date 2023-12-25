@@ -1,8 +1,9 @@
 package torrentfile
 
-import(
-	"fmt"
+import (
 	"bytes"
+	"crypto/sha1"
+	"fmt"
 	"os"
 	"github.com/jackpal/bencode-go"
 )
@@ -37,12 +38,24 @@ func Open(path string) (torrentfile, error){
 	if err != nil{
 		return torrentfile{}, err //return an empty torrentfile and the error if opening fails
 	}
-	defer file.Close()
+	defer file.Close() //making sure that the file is closed
 
-	bt := bTorrent{}
-	err := bencode.Unmarshal(file, &bt)
+	var bt bTorrent //creating an empty bTorrent struct to hold the data
+		
+	err = bencode.Unmarshal(file, bt) //attempting to decode the torrent using bencode
 	if err != nil {
-		return torrentfile{}, err
+		return torrentfile{}, err // return an empty torrentfile and the error if decoding fails
 	}
+	return torrentfile{},nil //a placeholder until a "totorrentfile" function is implemented
+}
 
+//hash calculates the SHA1 hash of the bInfo struct
+func (i *bInfo) hash() ([20]byte, error){
+	var buf bytes.Buffer //a buffer is created to hold the bencoded representation of the struct
+	err := bencode.Marshal(&buf, *i) //the struct is encoded using bencode
+	if err != nil{
+		return [20]byte{},err //return empty byte array and error if encoding fails.
+	}
+	h := sha1.Sum(buf.Bytes()) //calculate the SHA-1 hash of the encoded data
+	return h, nil //Return the calculated SHA-1 hash
 }
