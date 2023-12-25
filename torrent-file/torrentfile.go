@@ -59,3 +59,21 @@ func (i *bInfo) hash() ([20]byte, error){
 	h := sha1.Sum(buf.Bytes()) //calculate the SHA-1 hash of the encoded data
 	return h, nil //Return the calculated SHA-1 hash
 }
+
+func(i *bInfo) splithashes() ([][20]byte, error){
+	hlen := 20 //The length of a SHA1 hash
+	buf := []byte(i.pieces) // converting the pieces string into a byte slice
+	//Ensuring the length of the byte slice is a multiple of the hash length
+	if (len(buf)%hlen != 0){
+		err := fmt.Errorf("incorrect length size received, length of %d received, when a multiple of 20 is expected", len(buf))
+		return nil,err //returns an error if the length is invalid
+	}
+	hnum := len(buf)/hlen //calculating the number of hashes based on the buffer length
+	hashes := make([][20]byte, hnum) //a slice is made to hold each hash
+
+	//Iterate through the buffer and split it into individual hashes
+	for i:=0; i < hnum; i++{  
+		copy(hashes[i][:], buf[i*hlen:(i+1)*hlen]) //copy the 20 byte hash from the buffer into the corresponding position into the hashes slice
+	}
+	return hashes, nil //return the array of the individual hashes
+}	
