@@ -1,4 +1,4 @@
-module torrent-file
+module storrent
 
 go 1.21.5
 
