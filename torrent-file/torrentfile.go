@@ -77,3 +77,30 @@ func(i *bInfo) splithashes() ([][20]byte, error){
 	}
 	return hashes, nil //return the array of the individual hashes
 }	
+
+// totorrentfile creates a torrentfile struct from the bTorrent struct
+func (t *bTorrent) totorrentfile() (torrentfile, error) {
+    var tf torrentfile // create a new torrentfile struct
+
+    // calculate the piece hashes
+    hashes, err := t.info.splithashes()
+    if err != nil {
+        return torrentfile{}, err // return an empty torrentfile and the error if the hashes can't be calculated
+    }
+    tf.piecehash = hashes // set the piece hashes
+
+    // set the other fields
+    tf.piecesize = t.info.piecesize
+    tf.length = t.info.length
+    tf.name = t.info.name
+    tf.url = t.url
+
+    // calculate the infohash
+    infohash, err := t.info.hash()
+    if err != nil {
+        return torrentfile{}, err // return an empty torrentfile and the error if the infohash can't be calculated
+    }
+    tf.infohash = infohash // set the infohash
+
+    return tf, nil // return the torrentfile
+}
